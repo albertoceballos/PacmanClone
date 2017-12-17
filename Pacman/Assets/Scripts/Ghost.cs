@@ -13,8 +13,13 @@ public class Ghost : MonoBehaviour {
     public Sprite lookRightSprite;
     public Sprite lookDownSprite;
     public Sprite lookUpSprite;
+    public float startWaitTime = 0;
 
-    bool isGhostBlue = false;
+    public float cellXPos = 0;
+    public float cellYPos = 0;
+
+    public float waitTimeAfterEaten = 4.0f;
+    public bool isGhostBlue = false;
 
     public SpriteRenderer sr;
 
@@ -33,16 +38,23 @@ public class Ghost : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        Invoke("StartMoving", startWaitTime);
+	}
+
+    void StartMoving()
+    {
+        transform.position = new Vector2(13.5f,18.5f);
         float xDest = destinations[destinationIndex].x;
         if (transform.position.x > xDest)
         {
             rb.velocity = new Vector2(-1, 0) * speed;
 
         }
-        else {
+        else
+        {
             rb.velocity = new Vector2(1, 0) * speed;
         }
-	}
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -94,7 +106,34 @@ public class Ghost : MonoBehaviour {
         isGhostBlue = false;
     }
 
-    
+    GameObject pacmanGO = null;
+
+    public void ResetGhostAfterEaten(GameObject pacman)
+    {
+        transform.position = new Vector2(cellXPos, cellYPos);
+
+        rb.velocity = Vector2.zero;
+
+        pacmanGO = pacman;
+
+        Invoke("StartMovingAfterEaten", waitTimeAfterEaten);
+    }
+
+    void StartMovingAfterEaten()
+    {
+        transform.position = new Vector2(13.5f, 18.5f);
+        transform.position = new Vector2(13.5f, 18.5f);
+        float xDest = destinations[destinationIndex].x;
+        if (transform.position.x > xDest)
+        {
+            rb.velocity = new Vector2(-1, 0) * speed;
+
+        }
+        else
+        {
+            rb.velocity = new Vector2(1, 0) * speed;
+        }
+    }
 
     Vector2 GetNewDirection(Vector2 pointVect) {
         float xPos = (float)Math.Floor(Convert.ToDouble(transform.position.x));
@@ -106,12 +145,22 @@ public class Ghost : MonoBehaviour {
 
         Vector2 dest = destinations[destinationIndex];
 
+        if(pacmanGO != null)
+        {
+            dest = pacmanGO.transform.position;
+        }
+
         if(((pointVect.x + 1) == dest.x) && ((pointVect.y +1) == dest.y))
         {
             destinationIndex = (destinationIndex == 4) ? 0 : destinationIndex + 1;
             Debug.Log("New Destionation " + destinations[destinationIndex]);
         }
         dest = destinations[destinationIndex];
+
+        if(pacmanGO != null)
+        {
+            dest = pacmanGO.transform.position;
+        }
         Vector2 newDir = new Vector2(2, 0);
         Vector2 prevDir = rb.velocity.normalized;
 

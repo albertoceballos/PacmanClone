@@ -10,11 +10,17 @@ public class Pacman : MonoBehaviour {
 
     public Sprite pausedSprite;
 
+    int lives = 3;
+
     SoundManager soundManager;
 
     GameBoard gameBoard;
 
     Ghost redghost;
+    Ghost pinkGhost;
+    Ghost lightBlueGhost;
+    Ghost orangeGhost;
+
 
     private void Awake()
     {
@@ -23,8 +29,15 @@ public class Pacman : MonoBehaviour {
         gameBoard = FindObjectOfType(typeof(GameBoard)) as GameBoard;
 
         GameObject redGhostGO = GameObject.Find("redGhost");
+        GameObject pinkGhostGO = GameObject.Find("pinkGhost");
+        GameObject lightBlueGhostGO = GameObject.Find("lightBlueGhost");
+        GameObject orangeGhostGO = GameObject.Find("orangeGhost");
 
         redghost = (Ghost)redGhostGO.GetComponent(typeof(Ghost));
+        pinkGhost = (Ghost)pinkGhostGO.GetComponent(typeof(Ghost));
+        lightBlueGhost = (Ghost)lightBlueGhostGO.GetComponent(typeof(Ghost));
+        orangeGhost = (Ghost)orangeGhostGO.GetComponent(typeof(Ghost));
+
     }
     // Use this for initialization
     void Start () {
@@ -194,20 +207,114 @@ public class Pacman : MonoBehaviour {
         {
             SoundManager.instance.PlayOneShot(SoundManager.instance.powerUpEating);
             redghost.TurnGhostBlue();
+            pinkGhost.TurnGhostBlue();
+            lightBlueGhost.TurnGhostBlue();
+            orangeGhost.TurnGhostBlue();
+
+            IncreaseTextUIScore(50);
+
+            Destroy(col.gameObject);
+        }
+
+        if(col.gameObject.tag == "Ghost")
+        {
+            String ghostName = col.GetComponent<Collider2D>().gameObject.name;
+
+            AudioSource audioSource = soundManager.GetComponent<AudioSource>();
+
+            if (ghostName == "redGhost")
+            {
+                if (redghost.isGhostBlue)
+                {
+                    redghost.ResetGhostAfterEaten(gameObject);
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.eatingGhost);
+                    IncreaseTextUIScore(400);
+                }
+                else
+                {
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.pacmanDies);
+
+                    audioSource.Stop();
+                    Destroy(gameObject);
+                }
+            }else if (ghostName == "pinkGhost")
+            {
+                if (pinkGhost.isGhostBlue)
+                {
+                    pinkGhost.ResetGhostAfterEaten(gameObject);
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.eatingGhost);
+                    IncreaseTextUIScore(400);
+                }
+                else
+                {
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.pacmanDies);
+
+                    audioSource.Stop();
+                    Destroy(gameObject);
+                }
+            }else if (ghostName == "lightBlueGhost")
+            {
+                if (lightBlueGhost.isGhostBlue)
+                {
+                    lightBlueGhost.ResetGhostAfterEaten(gameObject);
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.eatingGhost);
+                    IncreaseTextUIScore(400);
+                }
+                else
+                {
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.pacmanDies);
+
+                    audioSource.Stop();
+                    Destroy(gameObject);
+                }
+            }else if(ghostName == "orangeGhost")
+            {
+                if (orangeGhost.isGhostBlue)
+                {
+                    orangeGhost.ResetGhostAfterEaten(gameObject);
+                    SoundManager.instance.PlayOneShot(SoundManager.instance.eatingGhost);
+                    IncreaseTextUIScore(400);
+                }
+                else
+                {
+                    pacmanDied(audioSource);
+                }
+            }
         }
     }
 
+    void pacmanDied(AudioSource audioSource)
+    {
+        if (lives == 0)
+        {
+           //to be created
+        }
+        else
+        {
+            SoundManager.instance.PlayOneShot(SoundManager.instance.pacmanDies);
+            audioSource.Stop();
+            Destroy(gameObject);
+            lives--;
+            respawnPacman();
+        }
+    }
+
+    void respawnPacman()
+    {
+        Instantiate(gameObject);
+    }
+
     void DotEaten(Collider2D col) {
-        IncreaseTextUIScore();
+        IncreaseTextUIScore(10);
 
         Destroy(col.gameObject);
     }
 
-    void IncreaseTextUIScore() {
+    void IncreaseTextUIScore(int points) {
         Text textUIComp = GameObject.Find("Score").GetComponent<Text>();
         int score = int.Parse(textUIComp.text);
 
-        score += 10;
+        score += points;
 
         textUIComp.text = score.ToString();
     }
